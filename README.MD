@@ -9,6 +9,6 @@ the most simple one, with callback hell (anonymous function), and use recursive.
 
 
 
-### [example 02](example_01/traverser.js)
+### [example 02](example_02/traverser.js)
 
 Eliminate recursive and callback hell. use named function instead of anonymous function. 
