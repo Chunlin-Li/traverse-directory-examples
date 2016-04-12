@@ -42,7 +42,7 @@ function traverse(filePath, callback) {
         if (err) {
             callback(err);
         } else {
-            // list and resolve all file in sub dir.
+            // list and resolve all file path in sub dir.
             var paths = files.map(function (item) {
                 return path.resolve(current, item);
             });
