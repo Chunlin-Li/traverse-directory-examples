@@ -1,0 +1,23 @@
+{
+  "name": "traverse-directory-examples",
+  "version": "1.0.0",
+  "description": "traverse directory examples =================",
+  "main": "index.js",
+  "dependencies": {
+    "bluebird": "^3.3.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Chunlin-Li/traverse-directory-examples.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Chunlin-Li/traverse-directory-examples/issues"
+  },
+  "homepage": "https://github.com/Chunlin-Li/traverse-directory-examples#readme"
+}

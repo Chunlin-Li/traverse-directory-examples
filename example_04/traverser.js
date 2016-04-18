@@ -6,36 +6,19 @@ var path = require('path');
 
 // function traverse(rootPath)
 function traverse(list, fileList) {
-    // a params overload trick
-    if (typeof list === 'string') {
-        list = [ list ];
-    }
-    fileList = fileList || [];
     return new Promise(
-        function (resolve, reject) {
+        function (resolve) {
+            // a params overload trick
+            if (typeof list === 'string') {
+                list = [ list ];
+            }
+            fileList = fileList || [];
+            // dequeue a item
             var current = list.shift();
             if (current) {
-                check(current)
-                    .then(function (type){
-                        if ('dir' === type){
-                            // if current path is subdir, list this subdir
-                            return list_subdir(current);
-                        } else {
-                            // add file path to result list.
-                            fileList.push(current);
-                            // go on
-                            resolve(traverse(list, fileList));
-                        }
-                    })
-                    .then(function(paths){
-                        if (!paths) return;
-                        // add to target list
-                        list = list.concat(paths);
-                        // go on
-                        resolve(traverse(list, fileList));
-                    });
+                resolve(task(current, list, fileList));
             } else {
-                // no more path in target list
+                // no more path in target list, resolve final result
                 resolve(fileList);
             }
         }
@@ -47,24 +30,42 @@ function traverse_callback(filePath, returnCallback) {
     traverse([ filePath ]).then(returnCallback.bind(null, null), returnCallback);
 }
 
+function task (current, list, fileList) {
+    return check(current)
+        .then(function (type){
+            if ('dir' === type){
+                // if current path is subdir, list this subdir
+                return list_subdir(current)
+                    .then(function(paths){
+                        list = list.concat(paths);
+                        return traverse(list, fileList);
+                    });
+            } else {
+                // add file path to result list.
+                fileList.push(current);
+                return traverse(list, fileList);
+            }
+        });
+}
+
+
+// wrap a constructed promise
 function check(filePath) {
     return new Promise(
         function(resolve, reject) {
             fs.lstat(filePath, function (err, stats) {
-                if (err) {
-                    reject(err);
-                } else {
-                    // return file type
-                    resolve(stats.isDirectory() ? 'dir' : 'file');
-                }
+                if (err) reject(err);
+                // return file type
+                else resolve(stats.isDirectory() ? 'dir' : 'file');
             });
         }
     )
 }
 
+// wrap a thenable
 function list_subdir(dirPath) {
-    return new Promise(
-        function(resolve, reject) {
+    return Promise.resolve({
+        then(resolve, reject){
             fs.readdir(dirPath, function (err, files){
                 if (err) {
                     reject(err);
@@ -76,16 +77,15 @@ function list_subdir(dirPath) {
                     // return
                     resolve(paths);
                 }
-            })
+            });
         }
-    );
+    });
 }
 
 
 /*  call traverse */
-// promise api
+/* promise api */
 traverse(process.argv[2])
-// traverse('../')
     .then(function(res) {
         console.log(res.length + '\n' + JSON.stringify(res));
     })
@@ -93,7 +93,7 @@ traverse(process.argv[2])
         console.error('Catch Error:', err);
     });
 
-// callback api
+/* callback api */
 // traverse_callback(process.argv[2], function(err, res){
 //     console.log(res.length + '\n' + JSON.stringify(res));
 // });
